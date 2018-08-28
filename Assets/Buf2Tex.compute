@@ -1,0 +1,15 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel Buf2Tex
+
+#define THREAD_NUM  16
+
+StructuredBuffer<float2> InputBuffer;
+RWTexture2D<float4>      outputTex;
+uint Dimension;
+
+[numthreads(THREAD_NUM, THREAD_NUM, 1)]
+void Buf2Tex(uint3 id : SV_DispatchThreadID)
+{
+    uint index = id.x * Dimension + id.y;
+    outputTex[id.xy] = float4(InputBuffer[index].x, InputBuffer[index].y, 0.0f, 1.0f);
+}
