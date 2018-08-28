@@ -293,7 +293,6 @@ public class OceanSimulation : MonoBehaviour
                 Vector2 t = FFT_Result[addr];
                 Vector2 u = FFT_Result[addr + istride];
 
-                // 该判定有问题   
                 int w = (addr - mod) / (istride << 1);
                 w = bitReverse(w, 1 << i);
 
