@@ -252,49 +252,6 @@ public class OceanSimulation : MonoBehaviour
         }
     }
 
-    void DFT_2(float[] _h, int N, ref Vector2[] Result)
-    {
-        Result = new Vector2[N * N];
-
-        Vector2[] temp = new Vector2[N * N];
-        for(int i = 0; i < N; i++)
-        {
-            for(int j = 0; j < N; j++)
-            {
-                temp[i * N + j].x = _h[i * N + j];
-                temp[i * N + j].y = 0.0f;
-            }
-        }
-
-        DFT_Row(temp, N, ref Result);
-
-        for(int i = 0; i < N; i++)
-        {
-            for(int j = 0; j < N; j++)
-            {
-                temp[i * N + j] = Result[j * N + i];
-            }
-        }
-
-        DFT_Row(temp, N, ref Result);
-
-        for (int i = 0; i < N; i++)
-        {
-            for (int j = 0; j < N; j++)
-            {
-                temp[i * N + j] = Result[j * N + i];
-            }
-        }
-
-        for(int i = 0; i < N; i++)
-        {
-            for(int j = 0; j < N; j++)
-            {
-                Result[i * N + j] = temp[i * N + j];
-            }
-        }
-    }
-
     int bitReverse(int i, int N)
     {
         int dst = 0;
@@ -419,7 +376,7 @@ public class OceanSimulation : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        int N = 16;
+        int N = 8;
         float[] _h = new float[N * N];
         for(int i = 0; i < N; i++)
         {
@@ -430,9 +387,6 @@ public class OceanSimulation : MonoBehaviour
         }
         Vector2[] DFT_Result = null;
         DFT(_h, N, ref DFT_Result);
-
-        Vector2[] DFT_Result_2 = null;
-        DFT_2(_h, N, ref DFT_Result_2);
 
         Vector2[] FFT_Result = null;
         FFT_CPU(_h, N, ref FFT_Result);
