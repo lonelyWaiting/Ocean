@@ -37,6 +37,13 @@ public class FFT {
         mTempBuffer = new ComputeBuffer(mSize * mSize, sizeof(float) * 2);
     }
 
+    private void SwapBuffer(ref ComputeBuffer A, ref ComputeBuffer B)
+    {
+        ComputeBuffer temp = A;
+        A = B;
+        B = temp;
+    }
+
     public void EvaluteFFT(ComputeBuffer srcBuffer, ref ComputeBuffer dstBuffer)
     {
         if (mTempBuffer == null || mBitReverseBuffer == null || dstBuffer == null || mRadix2FFT == null) return;
@@ -50,61 +57,85 @@ public class FFT {
         int thread_group = thread_count / OceanConst.RADIX2FFT_THREAD_NUM;
         for (int i = 0; i < interation; i++)
         {
-            mRadix2FFT.SetInt(OceanConst.RADIX2FFT_THREAD_COUNT, thread_count);
-            mRadix2FFT.SetInt(OceanConst.RADIX2FFT_ISTRIDE, thread_count / (1 << i));
-            mRadix2FFT.SetInt(OceanConst.RADIX2FFT_BITCOUNT, i);
-            mRadix2FFT.SetInt(OceanConst.RADIX2FFT_N, mSize);
-            mRadix2FFT.SetBuffer(OceanConst.RADIX2FFT_KERNEL_Radix2CS, OceanConst.RADIX2FFT_BIT_REVERSE, mBitReverseBuffer);
-            mRadix2FFT.SetBuffer(OceanConst.RADIX2FFT_KERNEL_Radix2CS, OceanConst.RADIX2FFT_INPUT, i == 0 ? srcBuffer : swapBuffer[0]);
-            mRadix2FFT.SetBuffer(OceanConst.RADIX2FFT_KERNEL_Radix2CS, OceanConst.RADIX2FFT_OUTPUT, swapBuffer[1]);
-            mRadix2FFT.Dispatch(OceanConst.RADIX2FFT_KERNEL_Radix2CS, thread_group, 1, 1);
+            mRadix2FFT.SetInt("thread_count", thread_count);
+            mRadix2FFT.SetInt("istride", thread_count / (1 << i));
+            mRadix2FFT.SetInt("bit_count", i);
+            mRadix2FFT.SetInt("N", mSize);
+            mRadix2FFT.SetBuffer(0, "bit_reverse", mBitReverseBuffer);
+            mRadix2FFT.SetBuffer(0, "input", i == 0 ? srcBuffer : swapBuffer[0]);
+            mRadix2FFT.SetBuffer(0, "output", swapBuffer[1]);
+            mRadix2FFT.Dispatch(0, thread_group, 1, 1);
 
-            ComputeBuffer interBuffer = swapBuffer[0];
-            swapBuffer[0] = swapBuffer[1];
-            swapBuffer[1] = interBuffer;
+            SwapBuffer(ref swapBuffer[0], ref swapBuffer[1]);
         }
 
+        // bit reverse
         {
-            mRadix2FFT.SetInt(OceanConst.RADIX2FFT_N, mSize);
-            mRadix2FFT.SetBuffer(OceanConst.RADIX2FFT_KERNEL_TRANSPOSE, OceanConst.RADIX2FFT_INPUT, swapBuffer[0]);
-            mRadix2FFT.SetBuffer(OceanConst.RADIX2FFT_KERNEL_TRANSPOSE, OceanConst.RADIX2FFT_OUTPUT, swapBuffer[1]);
-            mRadix2FFT.Dispatch(OceanConst.RADIX2FFT_KERNEL_TRANSPOSE, thread_group, 1, 1);
+            mRadix2FFT.SetInt("thread_count", thread_count);
+            mRadix2FFT.SetInt("istride", thread_count);
+            mRadix2FFT.SetInt("N", mSize);
+            mRadix2FFT.SetBuffer(3, "bit_reverse", mBitReverseBuffer);
+            mRadix2FFT.SetBuffer(3, "input", swapBuffer[0]);
+            mRadix2FFT.SetBuffer(3, "output", swapBuffer[1]);
+            mRadix2FFT.Dispatch(3, thread_group, 1, 1);
 
-            ComputeBuffer interBuffer = swapBuffer[0];
-            swapBuffer[0] = swapBuffer[1];
-            swapBuffer[1] = interBuffer;
+            SwapBuffer(ref swapBuffer[0], ref swapBuffer[1]);
+        }
+
+        // transpose
+        {
+            mRadix2FFT.SetInt("N", mSize);
+            mRadix2FFT.SetBuffer(1, "input", swapBuffer[0]);
+            mRadix2FFT.SetBuffer(1, "output", swapBuffer[1]);
+            mRadix2FFT.Dispatch(1, thread_group, 1, 1);
+
+            SwapBuffer(ref swapBuffer[0], ref swapBuffer[1]);
         }
 
         for (int i = 0; i < interation; i++)
         {
-            mRadix2FFT.SetInt(OceanConst.RADIX2FFT_THREAD_COUNT, thread_count);
-            mRadix2FFT.SetInt(OceanConst.RADIX2FFT_ISTRIDE, thread_count / (1 << i));
-            mRadix2FFT.SetInt(OceanConst.RADIX2FFT_BITCOUNT, i);
-            mRadix2FFT.SetInt(OceanConst.RADIX2FFT_N, mSize);
-            mRadix2FFT.SetBuffer(OceanConst.RADIX2FFT_KERNEL_Radix2CS, OceanConst.RADIX2FFT_BIT_REVERSE, mBitReverseBuffer);
+            mRadix2FFT.SetInt("thread_count", thread_count);
+            mRadix2FFT.SetInt("istride", thread_count / (1 << i));
+            mRadix2FFT.SetInt("bit_count", i);
+            mRadix2FFT.SetInt("N", mSize);
+            mRadix2FFT.SetBuffer(0, "bit_reverse", mBitReverseBuffer);
 
-            mRadix2FFT.SetBuffer(OceanConst.RADIX2FFT_KERNEL_Radix2CS, OceanConst.RADIX2FFT_INPUT, swapBuffer[0]);
-            mRadix2FFT.SetBuffer(OceanConst.RADIX2FFT_KERNEL_Radix2CS, OceanConst.RADIX2FFT_OUTPUT, swapBuffer[1]);
-            mRadix2FFT.Dispatch(OceanConst.RADIX2FFT_KERNEL_Radix2CS, thread_group, 1, 1);
+            mRadix2FFT.SetBuffer(0, "input", swapBuffer[0]);
+            mRadix2FFT.SetBuffer(0, "output", swapBuffer[1]);
+            mRadix2FFT.Dispatch(0, thread_group, 1, 1);
 
-            ComputeBuffer interBuffer = swapBuffer[0];
-            swapBuffer[0] = swapBuffer[1];
-            swapBuffer[1] = interBuffer;
+            SwapBuffer(ref swapBuffer[0], ref swapBuffer[1]);
         }
 
+        // bit reverse
         {
-            mRadix2FFT.SetInt(OceanConst.RADIX2FFT_N, mSize);
-            mRadix2FFT.SetBuffer(OceanConst.RADIX2FFT_KERNEL_TRANSPOSE, OceanConst.RADIX2FFT_INPUT, swapBuffer[0]);
-            mRadix2FFT.SetBuffer(OceanConst.RADIX2FFT_KERNEL_TRANSPOSE, OceanConst.RADIX2FFT_OUTPUT, swapBuffer[1]);
-            mRadix2FFT.Dispatch(OceanConst.RADIX2FFT_KERNEL_TRANSPOSE, thread_group, 1, 1);
+            mRadix2FFT.SetInt("thread_count", thread_count);
+            mRadix2FFT.SetInt("istride", thread_count);
+            mRadix2FFT.SetInt("N", mSize);
+            mRadix2FFT.SetBuffer(3, "bit_reverse", mBitReverseBuffer);
+            mRadix2FFT.SetBuffer(3, "input", swapBuffer[0]);
+            mRadix2FFT.SetBuffer(3, "output", swapBuffer[1]);
+            mRadix2FFT.Dispatch(3, thread_group, 1, 1);
+
+            SwapBuffer(ref swapBuffer[0], ref swapBuffer[1]);
         }
 
-        if (dstBuffer != swapBuffer[1])
+        // transpose
         {
-            mRadix2FFT.SetInt(OceanConst.RADIX2FFT_ISTRIDE, thread_count);
-            mRadix2FFT.SetBuffer(OceanConst.RADIX2FFT_KERNEL_COPYBUFFER, OceanConst.RADIX2FFT_INPUT, swapBuffer[1]);
-            mRadix2FFT.SetBuffer(OceanConst.RADIX2FFT_KERNEL_COPYBUFFER, OceanConst.RADIX2FFT_OUTPUT, dstBuffer);
-            mRadix2FFT.Dispatch(OceanConst.RADIX2FFT_KERNEL_COPYBUFFER, thread_group, 1, 1);
+            mRadix2FFT.SetInt("N", mSize);
+            mRadix2FFT.SetBuffer(1, "input", swapBuffer[0]);
+            mRadix2FFT.SetBuffer(1, "output", swapBuffer[1]);
+            mRadix2FFT.Dispatch(1, thread_group, 1, 1);
+
+            SwapBuffer(ref swapBuffer[0], ref swapBuffer[1]);
+        }
+
+        if (dstBuffer != swapBuffer[0])
+        {
+            mRadix2FFT.SetInt("istride", thread_count);
+            mRadix2FFT.SetBuffer(2, "input", swapBuffer[0]);
+            mRadix2FFT.SetBuffer(2, "output", dstBuffer);
+            mRadix2FFT.Dispatch(2, thread_group, 1, 1);
         }
     }
 

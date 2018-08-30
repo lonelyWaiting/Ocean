@@ -55,7 +55,7 @@
 				float dy = InputDy[addr].x * sign_correction;
 				float dz = InputHt[addr].x * sign_correction;
 
-				return fixed4(/*dx*/dz, /*dy*/dz, dz, 1.0f);
+				return fixed4(dx, dy, dz, 1.0f);
 			}
 			ENDCG
 		}

@@ -130,15 +130,15 @@ public class OceanSimulation : MonoBehaviour
         if (h0Buffer == null || omegaBuffer == null || HKBuffer == null || DxBuffer == null || DyBuffer == null) return;
 
         // H(0) -> H(t), D(x,t), D(y,t)
-        UpdateSpectrumShader.SetBuffer(OceanConst.KERNEL_UPDATE_SPECTRUM, OceanConst.SHADER_H0, h0Buffer);
-        UpdateSpectrumShader.SetBuffer(OceanConst.KERNEL_UPDATE_SPECTRUM, OceanConst.SHADER_OMEGA, omegaBuffer);
-        UpdateSpectrumShader.SetBuffer(OceanConst.KERNEL_UPDATE_SPECTRUM, OceanConst.SHADER_HK, HKBuffer);
-        UpdateSpectrumShader.SetBuffer(OceanConst.KERNEL_UPDATE_SPECTRUM, OceanConst.SHADER_DX, DxBuffer);
-        UpdateSpectrumShader.SetBuffer(OceanConst.KERNEL_UPDATE_SPECTRUM, OceanConst.SHADER_DY, DyBuffer);
-        UpdateSpectrumShader.SetInt(OceanConst.SHADER_DIMENSION, parameter.displaceMap_dimension);
-        UpdateSpectrumShader.SetFloat(OceanConst.SHADER_CURRENT_TIME, t);
+        UpdateSpectrumShader.SetBuffer(0, "H0", h0Buffer);
+        UpdateSpectrumShader.SetBuffer(0, "Omega", omegaBuffer);
+        UpdateSpectrumShader.SetBuffer(0, "HK", HKBuffer);
+        UpdateSpectrumShader.SetBuffer(0, "Dx", DxBuffer);
+        UpdateSpectrumShader.SetBuffer(0, "Dy", DyBuffer);
+        UpdateSpectrumShader.SetInt("Dimension", parameter.displaceMap_dimension);
+        UpdateSpectrumShader.SetFloat("curTime", t);
         int GroupNum = parameter.displaceMap_dimension / OceanConst.THREAD_GROUP;
-        UpdateSpectrumShader.Dispatch(OceanConst.KERNEL_UPDATE_SPECTRUM, GroupNum, GroupNum, 1);
+        UpdateSpectrumShader.Dispatch(0, GroupNum, GroupNum, 1);
 
         mFFT.EvaluteFFT(HKBuffer, ref HtBuffer);
         mFFT.EvaluteFFT(DxBuffer, ref DxtBuffer);
