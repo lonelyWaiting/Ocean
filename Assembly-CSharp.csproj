@@ -66,6 +66,7 @@
     <Compile Include="Assets\OceanConst.cs" />
     <Compile Include="Assets\OceanSimulation.cs" />
     <None Include="Assets\Buf2Tex.compute" />
+    <None Include="Assets\GenGradientFold.shader" />
     <None Include="Assets\UpdateSpectrum.compute" />
     <None Include="Assets\UpdateDisplacement.shader" />
     <None Include="Assets\Radix2FFT.compute" />

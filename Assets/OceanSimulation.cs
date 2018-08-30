@@ -15,15 +15,7 @@ struct OceanParameter
     public Vector2 wind_dir;
     public float wind_speed;
     public float wind_dependency;
-};
-
-struct FFTParameter
-{
-    public int thread_count;
-    public int istride;
-    public int ostride;
-    public int pstride;
-    public float phase_base;
+    public float choppyScale;
 };
 
 public class OceanSimulation : MonoBehaviour
@@ -50,6 +42,10 @@ public class OceanSimulation : MonoBehaviour
     public Shader        mUpdateDisplacement;
     private Material     mUpdateDisplacementMat;
     private RenderTexture mDisplacementMap;
+
+    public Shader           mGenGradientFold;
+    private Material        mGenGradientFoldMat;
+    private RenderTexture   mNormalMap;
 
     private FFT mFFT;
     private BufferVisualization mBufferVisual;
@@ -123,6 +119,7 @@ public class OceanSimulation : MonoBehaviour
         parameter.wind_dir              = new Vector2(0.8f, 0.6f);
         parameter.wind_speed            = 600.0f;
         parameter.wind_dependency       = 0.07f;
+        parameter.choppyScale           = 1.3f;
     }
 
     void UpdateDisplacementMap(float t, OceanParameter parameter)
@@ -143,10 +140,6 @@ public class OceanSimulation : MonoBehaviour
         mFFT.EvaluteFFT(HKBuffer, ref HtBuffer);
         mFFT.EvaluteFFT(DxBuffer, ref DxtBuffer);
         mFFT.EvaluteFFT(DyBuffer, ref DytBuffer);
-
-        //mFFT.EvaluteFFTCPU(HKBuffer, ref HtBuffer);
-        //mFFT.EvaluteFFTCPU(DxBuffer, ref DxtBuffer);
-        //mFFT.EvaluteFFTCPU(DyBuffer, ref DytBuffer);
     }
 
     // Use this for initialization
@@ -202,9 +195,16 @@ public class OceanSimulation : MonoBehaviour
         mUpdateDisplacementMat = new Material(mUpdateDisplacement);
 
         mDisplacementMap            = new RenderTexture(parameter.displaceMap_dimension, parameter.displaceMap_dimension, 0, RenderTextureFormat.ARGBFloat);
-        mDisplacementMap.filterMode = FilterMode.Bilinear;
+        mDisplacementMap.filterMode = FilterMode.Point;
         mDisplacementMap.wrapMode   = TextureWrapMode.Clamp;
         mDisplacementMap.Create();
+
+        mGenGradientFoldMat = new Material(mGenGradientFold);
+
+        mNormalMap            = new RenderTexture(parameter.displaceMap_dimension, parameter.displaceMap_dimension, 0, RenderTextureFormat.ARGBFloat);
+        mNormalMap.filterMode = FilterMode.Bilinear;
+        mNormalMap.wrapMode   = TextureWrapMode.Clamp;
+        mNormalMap.Create();
 
         UpdateDisplacementMap(0, parameter);
     }
@@ -225,9 +225,16 @@ public class OceanSimulation : MonoBehaviour
         mUpdateDisplacementMat.SetBuffer("InputDy", DytBuffer);
         mUpdateDisplacementMat.SetInt("width", parameter.displaceMap_dimension);
         mUpdateDisplacementMat.SetInt("height", parameter.displaceMap_dimension);
+        mUpdateDisplacementMat.SetFloat("choppyScale", parameter.choppyScale);
         Graphics.Blit(source, mDisplacementMap, mUpdateDisplacementMat);
 
-        Graphics.Blit(mDisplacementMap, destination);
+        mGenGradientFoldMat.SetTexture("_MainTex", mDisplacementMap);
+        mGenGradientFoldMat.SetInt("width", parameter.displaceMap_dimension);
+        mGenGradientFoldMat.SetFloat("choppyScale", parameter.choppyScale);
+        mGenGradientFoldMat.SetFloat("GridLen", parameter.displaceMap_dimension / parameter.patch_size);
+        Graphics.Blit(mDisplacementMap, mNormalMap, mGenGradientFoldMat);
+
+        Graphics.Blit(mNormalMap, destination);
     }
 
     void OnDestroy()
