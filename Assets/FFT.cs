@@ -61,7 +61,6 @@ public class FFT {
             mRadix2FFT.SetInt("istride", thread_count / (1 << i));
             mRadix2FFT.SetInt("bit_count", i);
             mRadix2FFT.SetInt("N", mSize);
-            mRadix2FFT.SetBuffer(0, "bit_reverse", mBitReverseBuffer);
             mRadix2FFT.SetBuffer(0, "input", i == 0 ? srcBuffer : swapBuffer[0]);
             mRadix2FFT.SetBuffer(0, "output", swapBuffer[1]);
             mRadix2FFT.Dispatch(0, thread_group, 1, 1);
@@ -84,6 +83,7 @@ public class FFT {
 
         // transpose
         {
+            mRadix2FFT.SetInt("thread_count", thread_count);
             mRadix2FFT.SetInt("N", mSize);
             mRadix2FFT.SetBuffer(1, "input", swapBuffer[0]);
             mRadix2FFT.SetBuffer(1, "output", swapBuffer[1]);
@@ -98,8 +98,6 @@ public class FFT {
             mRadix2FFT.SetInt("istride", thread_count / (1 << i));
             mRadix2FFT.SetInt("bit_count", i);
             mRadix2FFT.SetInt("N", mSize);
-            mRadix2FFT.SetBuffer(0, "bit_reverse", mBitReverseBuffer);
-
             mRadix2FFT.SetBuffer(0, "input", swapBuffer[0]);
             mRadix2FFT.SetBuffer(0, "output", swapBuffer[1]);
             mRadix2FFT.Dispatch(0, thread_group, 1, 1);
@@ -122,6 +120,7 @@ public class FFT {
 
         // transpose
         {
+            mRadix2FFT.SetInt("thread_count", thread_count);
             mRadix2FFT.SetInt("N", mSize);
             mRadix2FFT.SetBuffer(1, "input", swapBuffer[0]);
             mRadix2FFT.SetBuffer(1, "output", swapBuffer[1]);
@@ -132,6 +131,7 @@ public class FFT {
 
         if (dstBuffer != swapBuffer[0])
         {
+            mRadix2FFT.SetInt("thread_count", thread_count);
             mRadix2FFT.SetInt("istride", thread_count);
             mRadix2FFT.SetBuffer(2, "input", swapBuffer[0]);
             mRadix2FFT.SetBuffer(2, "output", dstBuffer);
