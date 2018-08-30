@@ -271,4 +271,5 @@ MonoBehaviour:
   Buf2TexShader: {fileID: 7200000, guid: 89ef74d20703c9740b62cf08a48afa1f, type: 3}
   UpdateSpectrumShader: {fileID: 7200000, guid: ba54c9a6622e8a242a951acb1263871d,
     type: 3}
-  FFTShader: {fileID: 7200000, guid: 980d6897a7414d74aa578355e003a83a, type: 3}
+  Radix2FFT: {fileID: 7200000, guid: 8cf9a11ebeb91724b85b0a1392319bd7, type: 3}
+  mUpdateDisplacement: {fileID: 4800000, guid: 7457481852d146348a234540c49af391, type: 3}

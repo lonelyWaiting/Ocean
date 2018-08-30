@@ -1,0 +1,72 @@
+﻿#pragma kernel Radix2CS
+#pragma kernel transpose
+
+#define THREAD_NUM 128
+#define PI 3.14159274
+
+uint thread_count;
+uint istride;
+uint bit_count;
+uint N;
+
+StructuredBuffer<int> bit_reverse;
+StructuredBuffer<float2>    input;
+RWStructuredBuffer<float2>  output;
+
+int bitReserve(uint src, uint bit_num)
+{
+    int dst = 0;
+    for (uint i = 0; i < bit_num; i++)
+    {
+        dst = (dst << 1) + (src & 1);
+        src = src >> 1;
+    }
+    return dst;
+}
+
+[numthreads(THREAD_NUM, 1, 1)]
+void Radix2CS(uint3 thread_id : SV_DispatchThreadID)
+{
+    if (thread_id.x >= thread_count)
+        return;
+
+    uint mod  = thread_id.x & (istride - 1);
+    uint addr = ((thread_id.x - mod) << 1) + mod;
+
+    float2 t = input[addr];
+    float2 u = input[addr + istride];
+
+    uint w = (addr - mod) / (istride << 1);
+    w = bitReserve(w, bit_count);
+
+    float buttfly_cos = cos(2 * PI * w / (2 << bit_count));
+    float buttfly_sin = sin(2 * PI * w / (2 << bit_count));
+
+    int reverse_addr   = bit_reverse[addr / N] * N + (addr & (N - 1));
+    int reverse_addr_2 = bit_reverse[(addr + istride) / N] * N + ((addr + istride) & (N - 1));
+
+    output[reverse_addr]   = float2(t.x + u.x * buttfly_cos - u.y * buttfly_sin, t.y + u.x * buttfly_sin + u.y * buttfly_cos);
+    output[reverse_addr_2] = float2(t.x - u.x * buttfly_cos + u.y * buttfly_sin, t.y - u.x * buttfly_sin - u.y * buttfly_cos);
+}
+
+[numthreads(THREAD_NUM, 1, 1)]
+void transpose(uint3 thread_id : SV_DispatchThreadID)
+{
+    if(thread_id.x >= thread_count)
+        return;
+
+    int row = thread_id.x / N;
+    int col = thread_id.x & N;
+
+    output[col * N + row] = input[thread_id.x];
+}
+
+[numthreads(THREAD_NUM,1,1)]
+void copyBuffer(uint3 thread_id : SV_DispatchThreadID)
+{
+    if(thread_id.x >= thread_count)
+        return;
+
+    output[thread_id.x] = input[thread_id.x];
+    output[thread_id.x + istride] = input[thread_id.x + istride];
+}

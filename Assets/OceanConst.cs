@@ -30,5 +30,16 @@ namespace OceanSystem
         public const string FFT_SHADER_SRC          = "src";
         public const string FFT_SHADER_DST          = "dst";
 
+        public const string RADIX2FFT_THREAD_COUNT   = "thread_count";
+        public const string RADIX2FFT_ISTRIDE        = "istride";
+        public const string RADIX2FFT_BITCOUNT       = "bit_count";
+        public const string RADIX2FFT_N              = "N";
+        public const string RADIX2FFT_INPUT          = "input";
+        public const string RADIX2FFT_OUTPUT         = "output";
+        public const string RADIX2FFT_BIT_REVERSE    = "bit_reverse";
+        public const int RADIX2FFT_KERNEL_Radix2CS   = 0;
+        public const int RADIX2FFT_KERNEL_TRANSPOSE  = 1;
+        public const int RADIX2FFT_KERNEL_COPYBUFFER = 2;
+        public const int RADIX2FFT_THREAD_NUM        = 128;
     }
 }
