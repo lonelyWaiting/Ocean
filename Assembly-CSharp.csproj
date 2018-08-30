@@ -67,7 +67,6 @@
     <Compile Include="Assets\OceanSimulation.cs" />
     <None Include="Assets\Buf2Tex.compute" />
     <None Include="Assets\UpdateSpectrum.compute" />
-    <None Include="Assets\FFT.compute" />
     <None Include="Assets\UpdateDisplacement.shader" />
     <None Include="Assets\Radix2FFT.compute" />
     <Reference Include="UnityEditor.StandardEvents">

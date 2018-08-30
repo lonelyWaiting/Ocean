@@ -140,13 +140,13 @@ public class OceanSimulation : MonoBehaviour
         int GroupNum = parameter.displaceMap_dimension / OceanConst.THREAD_GROUP;
         UpdateSpectrumShader.Dispatch(OceanConst.KERNEL_UPDATE_SPECTRUM, GroupNum, GroupNum, 1);
 
-        //mFFT.EvaluteFFT(HKBuffer, ref HtBuffer);
-        //mFFT.EvaluteFFT(DxBuffer, ref DxtBuffer);
-        //mFFT.EvaluteFFT(DyBuffer, ref DytBuffer);
+        mFFT.EvaluteFFT(HKBuffer, ref HtBuffer);
+        mFFT.EvaluteFFT(DxBuffer, ref DxtBuffer);
+        mFFT.EvaluteFFT(DyBuffer, ref DytBuffer);
 
-        mFFT.EvaluteFFTCPU(HKBuffer, ref HtBuffer);
-        mFFT.EvaluteFFTCPU(DxBuffer, ref DxtBuffer);
-        mFFT.EvaluteFFTCPU(DyBuffer, ref DytBuffer);
+        //mFFT.EvaluteFFTCPU(HKBuffer, ref HtBuffer);
+        //mFFT.EvaluteFFTCPU(DxBuffer, ref DxtBuffer);
+        //mFFT.EvaluteFFTCPU(DyBuffer, ref DytBuffer);
     }
 
     // Use this for initialization
@@ -212,7 +212,7 @@ public class OceanSimulation : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //UpdateDisplacementMap(Time.time, parameter);
+        UpdateDisplacementMap(Time.time, parameter);
     }
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)

@@ -32,8 +32,8 @@
 			StructuredBuffer<float2> InputDx;
 			StructuredBuffer<float2> InputDy;
 
-			uint width;
-			uint height;
+			int width;
+			int height;
 
 			v2f vert (appdata v)
 			{
@@ -45,18 +45,17 @@
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				uint index_x = (uint)(i.uv * (float)width);
-				uint index_y = (uint)(i.uv * (float)height);
-				uint addr = width * index_y + index_x;
+				int index_x = (int)(i.uv.x * width);
+				int index_y = (int)(i.uv.y * height);
+				int addr = index_y * width + index_x;
 
 				int sign_correction = ((index_x + index_y) & 1) ? -1 : 1;
-				sign_correction = 1;
 
 				float dx = InputDx[addr].x * sign_correction;
 				float dy = InputDy[addr].x * sign_correction;
 				float dz = InputHt[addr].x * sign_correction;
 
-				return fixed4(dx, dx, dx, 1.0f);
+				return fixed4(/*dx*/dz, /*dy*/dz, dz, 1.0f);
 			}
 			ENDCG
 		}
