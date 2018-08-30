@@ -146,51 +146,100 @@ public class FFT {
         Vector2[] srcData = new Vector2[mSize * mSize];
         srcBuffer.GetData(srcData);
 
-        Vector2[] Result = new Vector2[mSize * mSize];
-        Vector2[] cache  = new Vector2[mSize * mSize];
+        int count = mSize * mSize / 2;
 
-        for(int m = 0; m < mSize; m++)
+        // 列FFT
+        int log_2_N = (int)(Mathf.Log(mSize) / Mathf.Log(2));
+
+        for (int i = 0; i < log_2_N; i++)
         {
-            for(int n = 0; n < mSize; n++)
+            int istride = mSize * mSize / (2 << i);
+
+            for (int k = 0; k < count; k++)
             {
-                cache[m * n].x = Mathf.Cos(2 * Mathf.PI * m * n / mSize);
-                cache[m * n].y = Mathf.Sin(2 * Mathf.PI * m * n / mSize);
+                int mod = k & (istride - 1);
+                // 如果为8FFT，这里应该为<<3
+                int addr = ((k - mod) << 1) + mod;
+
+                // fetch complex number
+                Vector2 t = srcData[addr];
+                Vector2 u = srcData[addr + istride];
+
+                int w = (addr - mod) / (istride << 1);
+                w = bitReverse(w, 1 << i);
+
+                Vector2 W = new Vector2(Mathf.Cos(2 * Mathf.PI * w / (2 << i)), Mathf.Sin(2 * Mathf.PI * w / (2 << i)));
+
+                srcData[addr].x           = t.x + W.x * u.x - W.y * u.y;
+                srcData[addr].y           = t.y + W.x * u.y + W.y * u.x;
+                srcData[addr + istride].x = t.x - W.x * u.x + W.y * u.y;
+                srcData[addr + istride].y = t.y - W.x * u.y - W.y * u.x;
             }
         }
 
-        for (int z = 0; z < mSize; z++)
-        {
-            for(int x = 0; x < mSize; x++)
-            {
-                Vector2 result = Vector2.zero;
+        Vector2[] temp = new Vector2[mSize * mSize];
+	    for (int i = 0; i< mSize; i++)
+	    {
+		    for (int j = 0; j< mSize; j++)
+		    {
+			    temp[i * mSize + j] = srcData[bitReverse(i, mSize) * mSize + j];
+		    }
+	    }
 
-                for (int m = 0; m < mSize; m++)
-                {
-                    Vector2 sum = Vector2.zero;
+	    // 转置
+	    for (int i = 0; i< mSize; i++)
+	    {
+		    for (int j = 0; j< mSize; j++)
+		    {
+                srcData[i * mSize + j] = temp[j * mSize + i];
+		    }
+	    }
 
-                    for (int n = 0; n < mSize; n++)
-                    {
-                        int index = m * mSize + n;
+	    // 列行列式
+	    for (int i = 0; i<log_2_N; i++)
+	    {
+		    int istride = mSize * mSize / (2 << i);
 
-                        float _cos = cache[x * n].x;//Mathf.Cos(2 * Mathf.PI * x * n / mSize);
-                        float _sin = cache[x * n].y;// Mathf.Sin(2 * Mathf.PI * x * n / mSize);
+		    for (int k = 0; k<count; k++)
+		    {
+			    int mod = k & (istride - 1);
+                // 如果为8FFT，这里应该为<<3
+                int addr = ((k - mod) << 1) + mod;
 
-                        sum.x += srcData[index].x * _cos - srcData[index].y * _sin;
-                        sum.y += srcData[index].x * _sin + srcData[index].y * _cos;
-                    }
+                // fetch complex number
+                Vector2 t = srcData[addr];
+                Vector2 u = srcData[addr + istride];
 
-                    float cos = cache[z * m].x;// Mathf.Cos(2 * Mathf.PI * m * z / mSize);
-                    float sin = cache[z * m].y;// Mathf.Sin(2 * Mathf.PI * m * z / mSize);
+                int w = (addr - mod) / (istride << 1);
+                w = bitReverse(w, 1 << i);
 
-                    result.x += sum.x * cos - sum.y * sin;
-                    result.y += sum.y * cos + sum.x * sin;
-                }
+                Vector2 W = new Vector2(Mathf.Cos(2 * Mathf.PI * w / (2 << i)), Mathf.Sin(2 * Mathf.PI * w / (2 << i)));
+                srcData[addr].x           = t.x + W.x * u.x - W.y * u.y;
+                srcData[addr].y           = t.y + W.x * u.y + W.y * u.x;
+                srcData[addr + istride].x = t.x - W.x * u.x + W.y * u.y;
+                srcData[addr + istride].y = t.y - W.x * u.y - W.y * u.x;
 
-                Result[z * mSize + x] = result;
             }
-        }
+	    }
 
-        dstBuffer.SetData(Result);
+	    for (int i = 0; i< mSize; i++)
+	    {
+		    for (int j = 0; j< mSize; j++)
+		    {
+			    temp[i * mSize + j] = srcData[bitReverse(i, mSize) * mSize + j];
+		    }
+	    }
+
+	    // 转置
+	    for (int i = 0; i < mSize; i++)
+	    {
+		    for (int j = 0; j < mSize; j++)
+		    {
+                srcData[i * mSize + j] = temp[j * mSize + i];
+		    }
+	    }
+
+        dstBuffer.SetData(srcData);
     }
 
     public void Cleanup()
