@@ -50,6 +50,20 @@ public class OceanSimulation : MonoBehaviour
     private FFT mFFT;
     private BufferVisualization mBufferVisual;
 
+    int GetMapSize()
+    {
+        return parameter.displaceMap_dimension;
+    }
+
+    public RenderTexture GetNormalMap()
+    {
+        return mNormalMap;
+    }
+
+    public RenderTexture GetDisplacementMap()
+    {
+        return mDisplacementMap;
+    }
 
     float Gauss()
     {
@@ -112,7 +126,7 @@ public class OceanSimulation : MonoBehaviour
 
     void InitOceanParameter()
     {
-        parameter.displaceMap_dimension = 128;
+        parameter.displaceMap_dimension = 512;
         parameter.patch_size            = 2000.0f;
         parameter.time_scale            = 0.8f;
         parameter.wave_amplitude        = 0.35f;

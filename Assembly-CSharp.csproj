@@ -65,10 +65,12 @@
     <Compile Include="Assets\FFT.cs" />
     <Compile Include="Assets\OceanConst.cs" />
     <Compile Include="Assets\OceanSimulation.cs" />
+    <Compile Include="Assets\Water.cs" />
     <None Include="Assets\Buf2Tex.compute" />
     <None Include="Assets\GenGradientFold.shader" />
     <None Include="Assets\UpdateSpectrum.compute" />
     <None Include="Assets\UpdateDisplacement.shader" />
+    <None Include="Assets\Ocean.shader" />
     <None Include="Assets\Radix2FFT.compute" />
     <Reference Include="UnityEditor.StandardEvents">
       <HintPath>E:/Code/Unity/FFTOceanSimulation/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
