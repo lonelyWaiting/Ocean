@@ -2,7 +2,8 @@
 {
 	Properties
 	{
-		_MainTex ("Texture", 2D) = "white" {}
+		displacementMap("Texture", 2D) = "black" {}
+		normalMap("Texture", 2D) = "black"{}
 	}
 	SubShader
 	{
@@ -14,8 +15,6 @@
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
-			// make fog work
-			#pragma multi_compile_fog
 			
 			#include "UnityCG.cginc"
 
@@ -28,29 +27,28 @@
 			struct v2f
 			{
 				float2 uv : TEXCOORD0;
-				UNITY_FOG_COORDS(1)
 				float4 vertex : SV_POSITION;
 			};
 
-			sampler2D _MainTex;
-			float4 _MainTex_ST;
+			sampler2D displacementMap;
+			sampler2D normalMap;
 			
 			v2f vert (appdata v)
 			{
+				float4 vertex_displace = tex2Dlod(displacementMap, float4(v.uv, 0, 0));
+
 				v2f o;
-				o.vertex = UnityObjectToClipPos(v.vertex);
-				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-				UNITY_TRANSFER_FOG(o,o.vertex);
+				o.uv         = v.uv;
+				v.vertex.xz += vertex_displace.xz;
+				v.vertex.y   = vertex_displace.y;
+				o.vertex     = UnityObjectToClipPos(v.vertex);
 				return o;
 			}
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				// sample the texture
-				fixed4 col = tex2D(_MainTex, i.uv);
-				// apply fog
-				UNITY_APPLY_FOG(i.fogCoord, col);
-				return col;
+				fixed4 color = fixed4(1.0f,0.0f,0.0f,1.0f);
+				return color;
 			}
 			ENDCG
 		}

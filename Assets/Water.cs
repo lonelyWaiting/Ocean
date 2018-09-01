@@ -5,6 +5,13 @@ using UnityEngine;
 public class Water : MonoBehaviour {
 
     public Camera displacementCamera;
+    private Material OceanMat;
+
+    Mesh CreateUniformGrid()
+    {
+        Mesh mesh = new Mesh();
+        return mesh;
+    }
 
 	// Use this for initialization
 	void Start () {
@@ -18,8 +25,8 @@ public class Water : MonoBehaviour {
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-        //RenderTexture normalMap = displacementCamera.GetComponent<OceanSimulation>().GetNormalMap();
+        RenderTexture normalMap = displacementCamera.GetComponent<OceanSimulation>().GetNormalMap();
         RenderTexture displacementMap = displacementCamera.GetComponent<OceanSimulation>().GetDisplacementMap();
-        Graphics.Blit(displacementMap, destination);
+        Graphics.Blit(normalMap, destination);
     }
 }

@@ -53,8 +53,8 @@
 				int sign_correction = ((index_x + index_y) & 1) ? -1 : 1;
 
 				float dx = InputDx[addr].x * sign_correction * choppyScale;
-				float dy = InputDy[addr].x * sign_correction * choppyScale;
-				float dz = InputHt[addr].x * sign_correction;
+				float dy = InputHt[addr].x * sign_correction;
+				float dz = InputDy[addr].x * sign_correction * choppyScale;
 
 				return fixed4(dx, dy, dz, 1.0f);
 			}

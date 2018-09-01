@@ -56,10 +56,10 @@
 				float3 displace_back  = _MainTex.Sample(point_clamp_sampler, tc_back).xyz;
 				float3 displace_front = _MainTex.Sample(point_clamp_sampler, tc_front).xyz;
 
-				float2 gradient = float2(-(displace_right.z - displace_left.z), -(displace_front.z - displace_back.z));
+				float2 gradient = float2(-(displace_right.y - displace_left.y), -(displace_front.y - displace_back.y));
 				
-				float2 Dx = (displace_right.xy - displace_left.xy) * choppyScale * GridLen;
-				float2 Dy = (displace_front.xy - displace_back.xy) * choppyScale * GridLen;
+				float2 Dx = (displace_right.xz - displace_left.xz) * choppyScale * GridLen;
+				float2 Dy = (displace_front.xz - displace_back.xz) * choppyScale * GridLen;
 				float J = (1.0f + Dx.x) * (1.0f + Dy.y) - Dx.y * Dy.x;
 
 				float fold = max(1.0f - J, 0);
