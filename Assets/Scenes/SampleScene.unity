@@ -237,8 +237,8 @@ Camera:
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
-  m_HDR: 1
-  m_AllowMSAA: 1
+  m_HDR: 0
+  m_AllowMSAA: 0
   m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
   m_OcclusionCulling: 1
@@ -273,3 +273,4 @@ MonoBehaviour:
     type: 3}
   Radix2FFT: {fileID: 7200000, guid: 8cf9a11ebeb91724b85b0a1392319bd7, type: 3}
   mUpdateDisplacement: {fileID: 4800000, guid: 7457481852d146348a234540c49af391, type: 3}
+  mGenGradientFold: {fileID: 4800000, guid: 77ac9525d59d92042879246758191eb7, type: 3}
