@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraControl : MonoBehaviour {
+
+    private float xSpeed = 250.0f;
+    private float ySpeed = 120.0f;
+
     void Start()
     {
     }
@@ -10,12 +14,6 @@ public class CameraControl : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
-        //空格键抬升高度
-        if (Input.GetKey(KeyCode.Space))
-        {
-            transform.position = new Vector3(transform.position.x, transform.position.y + 1, transform.position.z);
-        }
-
         //w键前进
         if (Input.GetKey(KeyCode.W))
         {
@@ -35,6 +33,17 @@ public class CameraControl : MonoBehaviour {
         if (Input.GetKey(KeyCode.D))
         {
             this.gameObject.transform.Translate(new Vector3(30, 0, 0 * Time.deltaTime));
+        }
+
+        if(Input.GetMouseButton(1))
+        {
+            Vector3 EulerAngle = transform.rotation.eulerAngles;
+
+            EulerAngle.x -= Input.GetAxis("Mouse Y") * ySpeed * 0.02f;
+            EulerAngle.y += Input.GetAxis("Mouse X") * xSpeed * 0.02f;
+
+            Quaternion rot = Quaternion.Euler(EulerAngle);
+            transform.rotation = rot;
         }
     }
 }
