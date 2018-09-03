@@ -50,6 +50,11 @@ public class OceanSimulation : MonoBehaviour
     private FFT mFFT;
     private BufferVisualization mBufferVisual;
 
+    public Vector4 GetResolutionAndLength()
+    {
+        return new Vector4(parameter.displaceMap_dimension, parameter.displaceMap_dimension, parameter.patch_size, parameter.patch_size);
+    }
+
     int GetMapSize()
     {
         return parameter.displaceMap_dimension;
@@ -84,7 +89,7 @@ public class OceanSimulation : MonoBehaviour
 
         float Ksqr = K.x * K.x + K.y * K.y;
         float Kcos = K.x * windDir.x + K.y * windDir.y;
-        float phillips = amplitude * Mathf.Exp(-1.0f / (Ksqr * l * l)) / (Ksqr * Ksqr) * (Kcos * Kcos);
+        float phillips = amplitude * Mathf.Exp(-1.0f / (Ksqr * l * l)) / (Ksqr * Ksqr * Ksqr) * (Kcos * Kcos);
 
         // 与风向大于90度的波,减弱
         if (Kcos < 0.0f) phillips *= dir_depend;
@@ -105,7 +110,7 @@ public class OceanSimulation : MonoBehaviour
             {
                 K.x = (-parameter.displaceMap_dimension / 2.0f + j) * (2 * Mathf.PI / parameter.patch_size);
 
-                float phillips = (K.x == 0 && K.y == 0) ? 0 : Mathf.Sqrt(Phillips(K, windDir, parameter.wind_speed, parameter.wave_amplitude * 1e-1f, parameter.wind_dependency));
+                float phillips = (K.x == 0 && K.y == 0) ? 0 : Mathf.Sqrt(Phillips(K, windDir, parameter.wind_speed, parameter.wave_amplitude * 1e-7f, parameter.wind_dependency));
 
                 int index = i * parameter.displaceMap_dimension + j;
 
@@ -247,8 +252,6 @@ public class OceanSimulation : MonoBehaviour
         mGenGradientFoldMat.SetFloat("choppyScale", parameter.choppyScale);
         mGenGradientFoldMat.SetFloat("GridLen", parameter.displaceMap_dimension / parameter.patch_size);
         Graphics.Blit(mDisplacementMap, mNormalMap, mGenGradientFoldMat);
-
-        Graphics.Blit(mNormalMap, destination);
     }
 
     void OnDestroy()

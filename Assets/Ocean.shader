@@ -2,8 +2,8 @@
 {
 	Properties
 	{
-		displacementMap("Texture", 2D) = "black" {}
-		normalMap("Texture", 2D) = "black"{}
+		displacementMap("BumpMap", 2D) = "black" {}
+		normalMap("NormalMap", 2D) = "black"{}
 	}
 	SubShader
 	{

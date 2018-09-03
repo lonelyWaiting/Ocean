@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\BufferVisualization.cs" />
+    <Compile Include="Assets\CameraControl.cs" />
     <Compile Include="Assets\FFT.cs" />
     <Compile Include="Assets\OceanConst.cs" />
     <Compile Include="Assets\OceanSimulation.cs" />
