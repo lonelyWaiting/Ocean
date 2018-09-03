@@ -2,8 +2,8 @@
 {
 	Properties
 	{
-		/*displacementMap("BumpMap", 2D) = "black" {}
-		normalMap("NormalMap", 2D) = "black"{}*/
+		displacementMap("BumpMap", 2D) = "black" {}
+		NormalMap("NormalMap", 2D) = "black"{}
 	}
 	SubShader
 	{
@@ -27,7 +27,7 @@
 			struct v2f
 			{
 				float2 uv		: TEXCOORD0;
-				//float3 WorldPos : TEXCOORD1;
+				float3 WorldPos : TEXCOORD1;
 				float4 vertex	: SV_POSITION;
 			};
 
@@ -43,22 +43,22 @@
 				o.uv         = v.uv;
 				v.vertex.xz += vertex_displace.xz;
 				v.vertex.y   = vertex_displace.y;
-				//o.WorldPos	 = v.vertex.xyz;
+				o.WorldPos	 = v.vertex.xyz;
 				o.vertex     = UnityObjectToClipPos(v.vertex);
 				return o;
 			}
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				/*float3 eyeVec = _WorldSpaceCameraPos - i.WorldPos;
+				float3 eyeVec = _WorldSpaceCameraPos - i.WorldPos;
 				eyeVec = normalize(eyeVec);
 
-				float2 grad = tex2D(NormalMap, i.uv);
+				float2 grad = tex2Dlod(NormalMap, float4(i.uv, 0, 0));
 				float3 normal = normalize(float3(grad, texelLengthX2));
 				float3 reflect_vec = reflect(-eyeVec, normal);
-				float cos_angle = dot(normal, eyeVec);*/
+				float cos_angle = dot(normal, eyeVec);
 
-				fixed4 color = fixed4(1.0f,0.0f,0.0f,1.0f);
+				fixed4 color = fixed4(1.0f * cos_angle ,0.0f,0.0f,1.0f);
 				return color;
 			}
 			ENDCG
