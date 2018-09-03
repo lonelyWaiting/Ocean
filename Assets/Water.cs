@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//[ExecuteInEditMode]
 public class Water : MonoBehaviour {
 
     public Camera displacementCamera;
@@ -60,6 +61,7 @@ public class Water : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+        mCreate = false;
     }
 	
 	// Update is called once per frame
@@ -84,8 +86,8 @@ public class Water : MonoBehaviour {
         }
 
         OceanSimulation oceanSim = displacementCamera.GetComponent<OceanSimulation>();
-        mOceanMat.SetTexture("displacementMap", oceanSim.GetNormalMap());
-        mOceanMat.SetTexture("NormalMap", oceanSim.GetDisplacementMap());
+        mOceanMat.SetTexture("normalMap", oceanSim.GetNormalMap());
+        mOceanMat.SetTexture("displacementMap", oceanSim.GetDisplacementMap());
     }
 
     private void OnDestroy()
