@@ -10,6 +10,8 @@ public class Water : MonoBehaviour {
     private Material mOceanMat;
     private static bool mCreate = false;
 
+    private float texelLengthX2;
+
     Mesh CreateUniformGrid(int resolutionX, int resolutionZ, int width, int height)
     {
         int vertNumX = resolutionX + 1;
@@ -82,12 +84,15 @@ public class Water : MonoBehaviour {
             gameObject.AddComponent<MeshRenderer>();
             gameObject.GetComponent<MeshRenderer>().material = mOceanMat;
 
+            texelLengthX2 = resolutionAndLength.z / resolutionAndLength.x * 2;
+
             mCreate = true;
         }
 
         OceanSimulation oceanSim = displacementCamera.GetComponent<OceanSimulation>();
-        mOceanMat.SetTexture("normalMap", oceanSim.GetNormalMap());
+        mOceanMat.SetTexture("NormalMap", oceanSim.GetNormalMap());
         mOceanMat.SetTexture("displacementMap", oceanSim.GetDisplacementMap());
+        mOceanMat.SetFloat("texelLengthX2", texelLengthX2);
     }
 
     private void OnDestroy()
