@@ -58,7 +58,7 @@
 				float3 reflect_vec = reflect(-eyeVec, normal);
 				float cos_angle = dot(normal, eyeVec);
 
-				fixed4 color = fixed4(1.0f * cos_angle ,0.0f,0.0f,1.0f);
+				fixed4 color = fixed4(1.0f, 0.0f, 0.0f, 1.0f);
 				return color;
 			}
 			ENDCG

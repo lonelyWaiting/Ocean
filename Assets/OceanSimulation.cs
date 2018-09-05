@@ -232,26 +232,28 @@ public class OceanSimulation : MonoBehaviour
     void Update()
     {
         UpdateDisplacementMap(Time.time, parameter);
-    }
 
-    private void OnRenderImage(RenderTexture source, RenderTexture destination)
-    {
-        //mBufferVisual.Visualization(HtBuffer, destination);
-        if (!mUpdateDisplacement) return;
+        if (!mUpdateDisplacementMat) return;
 
+        RenderTexture oldRT = RenderTexture.active;
+
+        RenderTexture.active = mDisplacementMap;
         mUpdateDisplacementMat.SetBuffer("InputHt", HtBuffer);
         mUpdateDisplacementMat.SetBuffer("InputDx", DxtBuffer);
         mUpdateDisplacementMat.SetBuffer("InputDy", DytBuffer);
         mUpdateDisplacementMat.SetInt("width", parameter.displaceMap_dimension);
         mUpdateDisplacementMat.SetInt("height", parameter.displaceMap_dimension);
         mUpdateDisplacementMat.SetFloat("choppyScale", parameter.choppyScale);
-        Graphics.Blit(source, mDisplacementMap, mUpdateDisplacementMat);
+        mUpdateDisplacementMat.SetPass(0);
+        Graphics.DrawProcedural(MeshTopology.Triangles, 3);
 
+        RenderTexture.active = mNormalMap;
         mGenGradientFoldMat.SetTexture("_MainTex", mDisplacementMap);
         mGenGradientFoldMat.SetInt("width", parameter.displaceMap_dimension);
         mGenGradientFoldMat.SetFloat("choppyScale", parameter.choppyScale);
         mGenGradientFoldMat.SetFloat("GridLen", parameter.displaceMap_dimension / parameter.patch_size);
-        Graphics.Blit(mDisplacementMap, mNormalMap, mGenGradientFoldMat);
+        mGenGradientFoldMat.SetPass(0);
+        Graphics.DrawProcedural(MeshTopology.Triangles, 3);
     }
 
     void OnDestroy()

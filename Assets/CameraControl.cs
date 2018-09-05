@@ -46,4 +46,14 @@ public class CameraControl : MonoBehaviour {
             transform.rotation = rot;
         }
     }
+
+    private void OnPreRender()
+    {
+        GL.wireframe = true;
+    }
+
+    private void OnPostRender()
+    {
+        GL.wireframe = false;
+    }
 }

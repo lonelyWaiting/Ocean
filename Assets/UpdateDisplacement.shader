@@ -16,12 +16,6 @@
 			
 			#include "UnityCG.cginc"
 
-			struct appdata
-			{
-				float4 vertex : POSITION;
-				float2 uv : TEXCOORD0;
-			};
-
 			struct v2f
 			{
 				float2 uv : TEXCOORD0;
@@ -36,11 +30,17 @@
 			int height;
 			float choppyScale;
 
-			v2f vert (appdata v)
+			v2f vert (uint id : SV_VertexID)
 			{
 				v2f o;
-				o.vertex = UnityObjectToClipPos(v.vertex);
-				o.uv     = v.uv;
+				o.vertex.x = (float)(id % 2) * 4.0f - 1.0f;
+				o.vertex.y = (float)(id / 2) * 4.0f - 1.0f;
+				o.vertex.z = 0.0f;
+				o.vertex.w = 1.0f;
+
+				o.uv.x = (float)(id % 2) * 2.0f;
+				o.uv.y = 1.0f - (float)(id / 2) * 2.0f;
+
 				return o;
 			}
 			
