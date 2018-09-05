@@ -131,7 +131,7 @@ public class OceanSimulation : MonoBehaviour
 
     void InitOceanParameter()
     {
-        parameter.displaceMap_dimension = 256;
+        parameter.displaceMap_dimension = 512;
         parameter.patch_size            = 2000.0f;
         parameter.time_scale            = 0.8f;
         parameter.wave_amplitude        = 0.35f;

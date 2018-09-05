@@ -8,7 +8,6 @@ public class Water : MonoBehaviour {
     public Shader   mOceanShader;
     private Material mOceanMat;
     private static bool mCreate = false;
-
     private float texelLengthX2;
 
     Mesh CreateUniformGrid(int resolutionX, int resolutionZ, int width, int height)
@@ -37,25 +36,42 @@ public class Water : MonoBehaviour {
             }
         }
 
-        int[] indices = new int[resolutionX * resolutionZ * 6];
-        for(int z = 0, index = 0; z < resolutionZ; z++)
+        Mesh mesh     = new Mesh();
+        mesh.vertices = vertices;
+        mesh.uv       = texcoords;
+
+        List<int> indices = new List<int>();
+
+        int offset = 0, submesh = 0;
+        for(int z = 0; z < resolutionZ; z++)
         {
             for(int x = 0; x < resolutionX; x++)
             {
-                indices[index++] = x + z * vertNumX;
-                indices[index++] = x + (z + 1) * vertNumX;
-                indices[index++] = (x + 1) + z * vertNumX;
+                int baseVertIdx = x + z * vertNumX;
 
-                indices[index++] = x + (z + 1) * vertNumX;
-                indices[index++] = (x + 1) + (z + 1) * vertNumX;
-                indices[index++] = x + 1 + z * vertNumX;
+                if(baseVertIdx - offset + vertNumX + 1 >= (1 << 16) - 1)
+                {
+                    mesh.subMeshCount = submesh + 1;
+                    mesh.SetTriangles(indices, submesh++, false, offset);
+                    offset = baseVertIdx;
+                    indices.Clear();
+                }
+
+                indices.Add(baseVertIdx - offset);
+                indices.Add(baseVertIdx - offset + vertNumX);
+                indices.Add(baseVertIdx - offset + 1);
+
+                indices.Add(baseVertIdx - offset + vertNumX);
+                indices.Add(baseVertIdx - offset + vertNumX + 1);
+                indices.Add(baseVertIdx - offset + 1 );
             }
         }
 
-        Mesh mesh = new Mesh();
-        mesh.vertices  = vertices;
-        mesh.uv        = texcoords;
-        mesh.triangles = indices;
+        if (indices.Count > 0)
+        {
+            mesh.subMeshCount = submesh + 1;
+            mesh.SetTriangles(indices, submesh, false, offset);
+        }
 
         return mesh;
     }
@@ -71,17 +87,19 @@ public class Water : MonoBehaviour {
         {
             MeshFilter meshFilter = gameObject.GetComponent<MeshFilter>();
             if (meshFilter != null) Destroy(meshFilter);
-            gameObject.AddComponent<MeshFilter>();
+            meshFilter = gameObject.AddComponent<MeshFilter>();
 
             Vector4 resolutionAndLength = displacementCamera.GetComponent<OceanSimulation>().GetResolutionAndLength();
             Mesh grid = CreateUniformGrid((int)resolutionAndLength.x, (int)resolutionAndLength.y, (int)resolutionAndLength.z, (int)resolutionAndLength.w);
-            gameObject.GetComponent<MeshFilter>().mesh = grid;
+            meshFilter.mesh = grid;
 
             mOceanMat = new Material(mOceanShader);
             MeshRenderer renderer = gameObject.GetComponent<MeshRenderer>();
             if (renderer != null) Destroy(renderer);
-            gameObject.AddComponent<MeshRenderer>();
-            gameObject.GetComponent<MeshRenderer>().material = mOceanMat;
+            renderer = gameObject.AddComponent<MeshRenderer>();
+            Material[] materials = new Material[grid.subMeshCount];
+            for (int i = 0; i < grid.subMeshCount; i++) materials[i] = mOceanMat;
+            renderer.sharedMaterials = materials;
 
             texelLengthX2 = resolutionAndLength.z / resolutionAndLength.x * 2;
 
