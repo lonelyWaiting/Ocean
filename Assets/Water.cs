@@ -41,23 +41,27 @@ public class Water : MonoBehaviour {
 
     void CreateFresnelMap()
     {
-        uint[] buffer = new uint[FRESNEL_TEX_SIZE];
+        Color32[] buffer = new Color32[FRESNEL_TEX_SIZE];
         for(int i = 0; i < FRESNEL_TEX_SIZE; i++)
         {
             float cos_a = i / (float)FRESNEL_TEX_SIZE;
 
             // water refraction index using 1.3
-            uint frensel = (uint)(FresnelTerm(cos_a, 1.33f) * 255);
+            byte frensel = (byte)(FresnelTerm(cos_a, 1.33f) * 255);
 
-            uint sky_blend = (uint)(Mathf.Pow(1 / (1 + cos_a), mSkyBlend) * 255);
+            byte sky_blend = (byte)(Mathf.Pow(1.0f / (1.0f + cos_a), mSkyBlend) * 255);
 
-            buffer[i] = (sky_blend << 8) | frensel;
+            buffer[i].r = frensel;
+            buffer[i].g = sky_blend;
         }
 
         mFresnelMap            = new Texture2D(FRESNEL_TEX_SIZE, 1, TextureFormat.ARGB32, false);
         mFresnelMap.filterMode = FilterMode.Bilinear;
         mFresnelMap.wrapMode   = TextureWrapMode.Clamp;
         mFresnelMap.name       = "FresnelMap";
+        mFresnelMap.SetPixels32(buffer);
+        mFresnelMap.Apply();
+        
     }
 
     Mesh CreateUniformGrid(int resolutionX, int resolutionZ, int width, int height)
@@ -129,7 +133,6 @@ public class Water : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         mCreate = false;
-        CreateFresnelMap();
 
         mWaterBodyColor = new Vector3(0.07f, 0.15f, 0.2f);
         mSkyColor       = new Vector3(0.38f, 0.45f, 0.56f);
@@ -138,6 +141,9 @@ public class Water : MonoBehaviour {
         mBendParam      = new Vector3(0.1f, -0.4f, 0.2f);
         mSkyBlend       = 16;
         mShineness      = 400.0f;
+
+        CreateFresnelMap();
+
     }
 	
 	// Update is called once per frame
