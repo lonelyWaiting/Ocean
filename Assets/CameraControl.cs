@@ -49,11 +49,11 @@ public class CameraControl : MonoBehaviour {
 
     private void OnPreRender()
     {
-        GL.wireframe = true;
+        //GL.wireframe = true;
     }
 
     private void OnPostRender()
     {
-        GL.wireframe = false;
+        //GL.wireframe = false;
     }
 }

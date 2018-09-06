@@ -4,11 +4,60 @@ using UnityEngine;
 
 public class Water : MonoBehaviour {
 
-    public Camera displacementCamera;
-    public Shader   mOceanShader;
-    private Material mOceanMat;
+    public Camera       displacementCamera;
+    public Shader       mOceanShader;
+    private Material    mOceanMat;
     private static bool mCreate = false;
-    private float texelLengthX2;
+
+    private float   texelLengthX2;
+    private Vector3 mWaterBodyColor;
+    private Vector3 mSkyColor;
+    private Vector3 mSunDir;
+    private Vector3 mSunColor;
+    private Vector3 mBendParam;
+    private float   mSkyBlend;
+    private float   mShineness;
+
+    private const int   FRESNEL_TEX_SIZE = 256;
+    private Texture2D   mFresnelMap;
+    public Cubemap      mReflectionMap;
+
+    // 菲涅尔:https://zh.wikipedia.org/wiki/%E8%8F%B2%E6%B6%85%E8%80%B3%E6%96%B9%E7%A8%8B
+    // R_s = \left[\frac{sin(\theta_t - \theta_i)}{sin(\theta_t + \theta_i)}\right]^2
+    // R_p = \left[\frac{tan(\theta_t - \theta_i)}{tan(\theta_t + \theta_i)}\right]^2
+    // R = \frac{R_s + R_p}{2}
+    // 推导为入射角与折射率的形式:https://docs.microsoft.com/en-us/windows/desktop/direct3d9/d3dxfresnelterm
+    float FresnelTerm(float cosIndicentAngle, float refractionIdx)
+    {
+        float c = cosIndicentAngle;
+        float g = Mathf.Sqrt(cosIndicentAngle * cosIndicentAngle + refractionIdx * refractionIdx - 1);
+        float g_minus_c = g - c;
+        float g_add_c   = g + c;
+
+        float result = 0.5f * g_minus_c * g_minus_c / (g_add_c * g_add_c) * ((c * g_add_c - 1) * (c * g_add_c - 1) / ((c * g_minus_c + 1) * (c * g_minus_c + 1)) + 1);
+
+        return result;
+    }
+
+    void CreateFresnelMap()
+    {
+        uint[] buffer = new uint[FRESNEL_TEX_SIZE];
+        for(int i = 0; i < FRESNEL_TEX_SIZE; i++)
+        {
+            float cos_a = i / (float)FRESNEL_TEX_SIZE;
+
+            // water refraction index using 1.3
+            uint frensel = (uint)(FresnelTerm(cos_a, 1.33f) * 255);
+
+            uint sky_blend = (uint)(Mathf.Pow(1 / (1 + cos_a), mSkyBlend) * 255);
+
+            buffer[i] = (sky_blend << 8) | frensel;
+        }
+
+        mFresnelMap            = new Texture2D(FRESNEL_TEX_SIZE, 1, TextureFormat.ARGB32, false);
+        mFresnelMap.filterMode = FilterMode.Bilinear;
+        mFresnelMap.wrapMode   = TextureWrapMode.Clamp;
+    }
 
     Mesh CreateUniformGrid(int resolutionX, int resolutionZ, int width, int height)
     {
@@ -79,6 +128,15 @@ public class Water : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         mCreate = false;
+        CreateFresnelMap();
+
+        mWaterBodyColor = new Vector3(0.07f, 0.15f, 0.2f);
+        mSkyColor       = new Vector3(0.38f, 0.45f, 0.56f);
+        mSunDir         = new Vector3(0.936016f, -0.343206f, 0.0780013f);
+        mSunColor       = new Vector3(1.0f, 1.0f, 0.0f);
+        mBendParam      = new Vector3(0.1f, -0.4f, 0.2f);
+        mSkyBlend       = 16;
+        mShineness      = 400.0f;
     }
 	
 	// Update is called once per frame
@@ -107,9 +165,17 @@ public class Water : MonoBehaviour {
         }
 
         OceanSimulation oceanSim = displacementCamera.GetComponent<OceanSimulation>();
-        mOceanMat.SetTexture("NormalMap", oceanSim.GetNormalMap());
         mOceanMat.SetTexture("displacementMap", oceanSim.GetDisplacementMap());
+        mOceanMat.SetTexture("NormalMap", oceanSim.GetNormalMap());
+        mOceanMat.SetTexture("FresnelMap", mFresnelMap);
+        mOceanMat.SetTexture("reflectCube", mReflectionMap);
         mOceanMat.SetFloat("texelLengthX2", texelLengthX2);
+        mOceanMat.SetVector("WaterBodyColor", new Vector4(mWaterBodyColor.x, mWaterBodyColor.y, mWaterBodyColor.z, 0.0f));
+        mOceanMat.SetVector("skyColor", new Vector4(mSkyColor.x, mSkyColor.y, mSkyColor.z, 0.0f));
+        mOceanMat.SetVector("sunDir", new Vector4(mSunDir.x, mSunDir.y, mSunDir.z, 0.0f));
+        mOceanMat.SetVector("sunColor", new Vector4(mSunColor.x, mSunColor.y, mSunColor.z, 0.0f));
+        mOceanMat.SetVector("bendParam", new Vector4(mBendParam.x, mBendParam.y, mBendParam.z, 0.0f));
+        mOceanMat.SetFloat("shineness", mShineness);
     }
 
     private void OnDestroy()

@@ -33,7 +33,15 @@
 
 			sampler2D displacementMap;
 			sampler2D NormalMap;
+			sampler2D FresnelMap;
+			samplerCUBE reflectCube;
 			float texelLengthX2;
+			float3 WaterBodyColor;
+			float3 skyColor;
+			float3 sunDir;
+			float3 sunColor;
+			float3 bendParam;
+			float shineness;
 
 			v2f vert (appdata v)
 			{
@@ -53,13 +61,30 @@
 				float3 eyeVec = _WorldSpaceCameraPos - i.WorldPos;
 				eyeVec = normalize(eyeVec);
 
-				float2 grad = tex2Dlod(NormalMap, float4(i.uv, 0, 0));
-				float3 normal = normalize(float3(grad, texelLengthX2));
+				float2 grad = tex2Dlod(NormalMap, float4(i.uv, 0, 0)).xy;
+				float3 normal = normalize(float3(grad.x, texelLengthX2, grad.y));
 				float3 reflect_vec = reflect(-eyeVec, normal);
 				float cos_angle = dot(normal, eyeVec);
 
-				fixed4 color = fixed4(1.0f, 0.0f, 0.0f, 1.0f);
-				return color;
+				float3 body_color = WaterBodyColor;
+
+				float4 ramp = tex2D(FresnelMap, float2(cos_angle, 0.0f));
+
+				if (reflect_vec.z < bendParam.x)
+					ramp.x = lerp(ramp.x, bendParam.z, (bendParam.x - reflect_vec.z) / (bendParam.x - bendParam.y));
+				reflect_vec.z = max(0, reflect_vec.z);
+
+				float3 reflection = texCUBE(reflectCube, reflect_vec);
+				// making higher contrast
+				reflection = reflection * reflection * 2.5f;
+
+				float3 reflection_color = lerp(skyColor, reflection, ramp.y);
+				float3 water_color = lerp(body_color, reflection_color, ramp.x);
+
+				float sun_spot = pow(clamp(dot(reflect_vec, sunDir), 0, 1), shineness);
+				water_color += sunColor * sun_spot;
+
+				return fixed4(water_color, 1.0f);
 			}
 			ENDCG
 		}
