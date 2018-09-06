@@ -216,6 +216,7 @@ public class OceanSimulation : MonoBehaviour
         mDisplacementMap            = new RenderTexture(parameter.displaceMap_dimension, parameter.displaceMap_dimension, 0, RenderTextureFormat.ARGBFloat);
         mDisplacementMap.filterMode = FilterMode.Point;
         mDisplacementMap.wrapMode   = TextureWrapMode.Clamp;
+        mDisplacementMap.name       = "DisplacementMap";
         mDisplacementMap.Create();
 
         mGenGradientFoldMat = new Material(mGenGradientFold);
@@ -223,6 +224,7 @@ public class OceanSimulation : MonoBehaviour
         mNormalMap            = new RenderTexture(parameter.displaceMap_dimension, parameter.displaceMap_dimension, 0, RenderTextureFormat.ARGBFloat);
         mNormalMap.filterMode = FilterMode.Bilinear;
         mNormalMap.wrapMode   = TextureWrapMode.Clamp;
+        mNormalMap.name       = "NormalMap";
         mNormalMap.Create();
 
         UpdateDisplacementMap(0, parameter);

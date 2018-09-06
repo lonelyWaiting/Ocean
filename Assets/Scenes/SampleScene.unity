@@ -208,7 +208,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displacementCamera: {fileID: 1641965496}
   mOceanShader: {fileID: 4800000, guid: 9cbe53dd089a28549990362769569703, type: 3}
-  mReflectionMap: {fileID: 0}
+  mReflectionMap: {fileID: 8900000, guid: f44b559c85e98b34b84976d031197cbd, type: 3}
 --- !u!4 &174877843
 Transform:
   m_ObjectHideFlags: 0

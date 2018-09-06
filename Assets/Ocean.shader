@@ -63,6 +63,9 @@
 
 				float2 grad = tex2Dlod(NormalMap, float4(i.uv, 0, 0)).xy;
 				float3 normal = normalize(float3(grad.x, texelLengthX2, grad.y));
+				// reflect(i,n): i - 2 * n * dot(n,i)
+				// i: incident ray
+				// https://docs.microsoft.com/en-us/windows/desktop/direct3dhlsl/dx-graphics-hlsl-reflect
 				float3 reflect_vec = reflect(-eyeVec, normal);
 				float cos_angle = dot(normal, eyeVec);
 
@@ -70,9 +73,9 @@
 
 				float4 ramp = tex2D(FresnelMap, float2(cos_angle, 0.0f));
 
-				if (reflect_vec.z < bendParam.x)
-					ramp.x = lerp(ramp.x, bendParam.z, (bendParam.x - reflect_vec.z) / (bendParam.x - bendParam.y));
-				reflect_vec.z = max(0, reflect_vec.z);
+				if (reflect_vec.y < bendParam.x)
+					ramp = lerp(ramp, bendParam.z, (bendParam.x - reflect_vec.y) / (bendParam.x - bendParam.y));
+				reflect_vec.y = max(0, reflect_vec.y);
 
 				float3 reflection = texCUBE(reflectCube, reflect_vec);
 				// making higher contrast

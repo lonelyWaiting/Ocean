@@ -57,6 +57,7 @@ public class Water : MonoBehaviour {
         mFresnelMap            = new Texture2D(FRESNEL_TEX_SIZE, 1, TextureFormat.ARGB32, false);
         mFresnelMap.filterMode = FilterMode.Bilinear;
         mFresnelMap.wrapMode   = TextureWrapMode.Clamp;
+        mFresnelMap.name       = "FresnelMap";
     }
 
     Mesh CreateUniformGrid(int resolutionX, int resolutionZ, int width, int height)
@@ -132,7 +133,7 @@ public class Water : MonoBehaviour {
 
         mWaterBodyColor = new Vector3(0.07f, 0.15f, 0.2f);
         mSkyColor       = new Vector3(0.38f, 0.45f, 0.56f);
-        mSunDir         = new Vector3(0.936016f, -0.343206f, 0.0780013f);
+        mSunDir         = new Vector3(0.936016f, 0.0780013f, -0.343206f);
         mSunColor       = new Vector3(1.0f, 1.0f, 0.0f);
         mBendParam      = new Vector3(0.1f, -0.4f, 0.2f);
         mSkyBlend       = 16;
