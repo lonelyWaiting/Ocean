@@ -1,7 +1,7 @@
 # Ocean
 FFT Ocean Implement of "Simulation Ocean Water Jerry Tessendorf"
 
-[Ocean](./ocean_effect.png)
+![Ocean](./ocean_effect.png)
 
 # Algorithm
 
