@@ -1,6 +1,8 @@
 # Ocean
 FFT Ocean Implement of "Simulation Ocean Water Jerry Tessendorf"
 
+[Ocean](./ocean_effect.png)
+
 # Algorithm
 
 - 根据`Phillips Specturm`在频率域实现波形
